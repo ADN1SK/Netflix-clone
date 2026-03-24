@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NETFLUX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           style.css — Netflix Clone Styles
+           ======================================== */
+
+        :root {
+            --primary-red: #E50914;
+            --primary-red-hover: #f40612;
+            --bg-dark: #141414;
+            --bg-darker: #0a0a0a;
+            --bg-card: #181818;
+            --text-light: #ffffff;
+            --text-muted: #b3b3b3;
+            --text-dim: #808080;
+            --gradient-hero: linear-gradient(to right, rgba(20,20,20,0.97) 0%, rgba(20,20,20,0.75) 35%, rgba(20,20,20,0.15) 65%, transparent 100%);
+            --gradient-hero-bottom: linear-gradient(to top, var(--bg-dark) 0%, rgba(20,20,20,0.7) 25%, transparent 100%);
+            --shadow-card: 0 4px 20px rgba(0,0,0,0.6);
+            --shadow-card-hover: 0 8px 40px rgba(0,0,0,0.95);
+            --transition-fast: 0.2s ease;
+            --transition-medium: 0.35s ease;
+            --transition-slow: 0.5s ease;
+            --nav-height: 68px;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --row-padding: 60px;
+            --card-radius: 6px;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { border: none; outline: none; cursor: pointer; font-family: var(--font-family); }
+        img { display: block; max-width: 100%; }
+
+        /* ---- Loader ---- */
+        .loader-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .loader-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .loader-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .loader-n {
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--primary-red);
+            letter-spacing: -4px;
+            animation: pulseN 1.4s ease-in-out infinite;
+            text-shadow: 0 0 60px rgba(229,9,20,0.5);
+        }
+
+        .loader-bar {
+            width: 120px;
+            height: 3px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loader-bar-inner {
+            width: 40%;
+            height: 100%;
+            background: var(--primary-red);
+            border-radius: 3px;
+            animation: loadSlide 1.2s ease-in-out infinite;
+        }
+
+        @keyframes pulseN {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.94); }
+        }
+
+        @keyframes loadSlide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(350%); }
+        }
+
+        /* ---- Navbar ---- */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--row-padding);
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+            transition: background var(--transition-medium), box-shadow var(--transition-medium);
+        }
+
+        .navbar.scrolled {
+            background: rgba(10,10,10,0.97);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 40px; }
+
+        .nav-logo {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: var(--primary-red);
+            letter-spacing: -1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .nav-links { display: flex; gap: 22px; list-style: none; }
+
+        .nav-links a {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .nav-links a:hover, .nav-links a.active { color: var(--text-light); }
+
+        .nav-right { display: flex; align-items: center; gap: 18px; }
+
+        .nav-icon-btn {
+            background: none;
+            color: var(--text-light);
+            font-size: 1.15rem;
+            transition: color var(--transition-fast);
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-icon-btn:hover { color: var(--text-muted); }
+
+        .nav-avatar {
+            width: 32px; height: 32px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #e50914, #b20710);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700;
+            cursor: pointer;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .nav-avatar:hover { transform: scale(1.1); box-shadow: 0 0 0 2px var(--text-light); }
+
+        /* ---- Hero ---- */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 92vh;
+            min-height: 520px;
+            max-height: 920px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute; inset: 0;
+            background-size: cover;
+            background-position: center 20%;
+            background-repeat: no-repeat;
+            animation: heroZoom 25s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroZoom {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.08); }
+        }
+
+        .hero-overlay-side { position: absolute; inset: 0; background: var(--gradient-hero); }
+        .hero-overlay-bottom { position: absolute; inset: 0; background: var(--gradient-hero-bottom); }
+
+        .hero-content {
+            position: relative; z-index: 2;
+            padding: 0 var(--row-padding);
+            max-width: 620px;
+            animation: fadeSlideUp 1s ease 0.4s both;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 14px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 18px;
+            background: rgba(229,9,20,0.15);
+            border: 1px solid rgba(229,9,20,0.35);
+            color: #ff6b6b;
+        }
+
+        .hero-top10 {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .top10-badge {
+            background: var(--primary-red);
+            color: white;
+            font-weight: 900;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .top10-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .hero-title {
+            font-size: 3.6rem;
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 18px;
+            text-shadow: 2px 4px 30px rgba(0,0,0,0.9);
+            letter-spacing: -1px;
+        }
+
+        .hero-description {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 28px;
+            max-width: 500px;
+            text-shadow: 1px 1px 8px rgba(0,0,0,0.7);
+        }
+
+        .hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 30px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all var(--transition-fast);
+            letter-spacing: 0.3px;
+            user-select: none;
+        }
+
+        .btn-play { background: var(--text-light); color: var(--bg-dark); }
+        .btn-play:hover { background: rgba(255,255,255,0.82); transform: scale(1.05); }
+        .btn-play:active { transform: scale(0.97); background: rgba(255,255,255,0.7); }
+
+        .btn-info { background: rgba(109,109,110,0.7); color: var(--text-light); backdrop-filter: blur(4px); }
+        .btn-info:hover { background: rgba(109,109,110,0.5); transform: scale(1.05); }
+        .btn-info:active { transform: scale(0.97); background: rgba(109,109,110,0.35); }
+
+        .btn-icon { font-size: 1.3rem; line-height: 1; }
+
+        /* ---- Rows Container ---- */
+        .rows-container {
+            position: relative;
+            margin-top: -140px;
+            z-index: 5;
+            padding-bottom: 40px;
+        }
+
+        /* ---- Movie Row ---- */
+        .movie-row {
+            margin-bottom: 44px;
+            opacity: 0;
+            transform: translateY(35px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .movie-row.visible { opacity: 1; transform: translateY(0); }
+
+        .row-header {
+            padding: 0 var(--row-padding);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .row-title { font-size: 1.35rem; font-weight: 700; }
+
+        .row-explore {
+            font-size: 0.78rem;
+            color: var(--primary-red);
+            font-weight: 600;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity var(--transition-medium), transform var(--transition-medium);
+            cursor: pointer;
+        }
+
+        .movie-row:hover .row-explore { opacity: 1; transform: translateX(0); }
+
+        .row-carousel-wrapper { position: relative; }
+
+        .row-carousel {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            overflow-y: visible;
+            scroll-behavior: smooth;
+            padding: 16px var(--row-padding) 24px;
+            scrollbar-width: none;
+        }
+
+        .row-carousel::-webkit-scrollbar { display: none; }
+
+        /* ---- Scroll Buttons ---- */
+        .scroll-btn {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            background: rgba(20,20,20,0.75);
+            color: var(--text-light);
+            font-size: 2.2rem;
+            opacity: 0;
+            transition: opacity var(--transition-medium), background var(--transition-fast);
+            cursor: pointer;
+            border: none;
+        }
+
+        .scroll-btn:hover { background: rgba(20,20,20,0.95); }
+        .row-carousel-wrapper:hover .scroll-btn { opacity: 1; }
+
+        .scroll-btn-left { left: 0; border-radius: 0 var(--card-radius) var(--card-radius) 0; }
+        .scroll-btn-right { right: 0; border-radius: var(--card-radius) 0 0 var(--card-radius); }
+
+        /* ---- Movie Cards ---- */
+        .movie-card {
+            flex: 0 0 auto;
+            width: 225px;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform var(--transition-medium) ease, box-shadow var(--transition-medium) ease;
+            z-index: 1;
+            background: var(--bg-card);
+        }
+
+        .movie-card:hover {
+            transform: scale(1.08);
+            box-shadow: var(--shadow-card-hover);
+            z-index: 20;
+        }
+
+        .movie-card-img {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+            background: #222;
+        }
+
+        .movie-card-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 12px;
+            background: linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.6) 40%, transparent 65%);
+            opacity: 0;
+            transition: opacity var(--transition-medium);
+        }
+
+        .movie-card:hover .movie-card-overlay { opacity: 1; }
+
+        .movie-card-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .movie-card-match { color: #46d369; font-weight: 700; }
+
+        .movie-card-actions { display: flex; gap: 6px; }
+
+        .card-action-btn {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.5);
+            background: rgba(42,42,42,0.85);
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .card-action-btn:hover {
+            border-color: white;
+            background: rgba(255,255,255,0.15);
+            transform: scale(1.15);
+        }
+
+        .card-action-btn.primary-action {
+            background: white;
+            color: black;
+            border-color: white;
+        }
+
+        .card-action-btn.primary-action:hover { background: #ddd; }
+
+        .card-action-spacer { flex: 1; }
+
+        /* ---- Modal ---- */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-medium), visibility var(--transition-medium);
+            padding: 20px;
+        }
+
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 720px;
+            max-height: 88vh;
+            overflow-y: auto;
+            transform: scale(0.92) translateY(20px);
+            transition: transform var(--transition-medium);
+            position: relative;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.7);
+            scrollbar-width: thin;
+            scrollbar-color: #444 transparent;
+        }
+
+        .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+
+        .modal-hero-img {
+            width: 100%;
+            height: 320px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .modal-hero-gradient {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, var(--bg-card) 0%, rgba(24,24,24,0.5) 50%, transparent 100%);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 14px; right: 14px;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--bg-dark);
+            color: white;
+            font-size: 1.15rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            border: none;
+            z-index: 10;
+            transition: background var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .modal-close-btn:hover { background: var(--primary-red); transform: scale(1.1); }
+
+        .modal-body {
+            padding: 0 36px 36px;
+            margin-top: -70px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .modal-buttons { display: flex; gap: 10px; margin-bottom: 24px; }
+
+        .modal-btn-play {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            background: white;
+            color: black;
+            transition: background var(--transition-fast);
+        }
+
+        .modal-btn-play:hover { background: #ddd; }
+
+        .modal-round-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.5);
+            background: rgba(42,42,42,0.6);
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .modal-round-btn:hover { border-color: white; transform: scale(1.1); }
+
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            line-height: 1.15;
+        }
+
+        .modal-meta {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .modal-match-text { color: #46d369; font-weight: 700; }
+
+        .modal-rating-pill {
+            border: 1px solid var(--text-dim);
+            padding: 1px 8px;
+            border-radius: 3px;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .modal-hd {
+            border: 1px solid var(--text-dim);
+            padding: 0px 6px;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .modal-description {
+            color: var(--text-muted);
+            line-height: 1.75;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px 18px;
+            font-size: 0.85rem;
+        }
+
+        .modal-info-label { color: var(--text-dim); }
+        .modal-info-value { color: var(--text-muted); }
+
+        /* ---- Footer ---- */
+        .site-footer {
+            padding: 60px var(--row-padding) 40px;
+            color: var(--text-dim);
+            font-size: 0.78rem;
+        }
+
+        .footer-social { display: flex; gap: 24px; margin-bottom: 28px; }
+
+        .footer-social-link {
+            color: var(--text-light);
+            font-size: 1.15rem;
+            transition: color var(--transition-fast);
+            background: none;
+            display: flex;
+        }
+
+        .footer-social-link:hover { color: var(--primary-red); }
+
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .footer-links a {
+            color: var(--text-dim);
+            font-size: 0.78rem;
+            transition: color var(--transition-fast);
+        }
+
+        .footer-links a:hover { color: var(--text-muted); text-decoration: underline; }
+
+        .footer-service-code {
+            display: inline-block;
+            padding: 4px 10px;
+            border: 1px solid var(--text-dim);
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: color var(--transition-fast), border-color var(--transition-fast);
+        }
+
+        .footer-service-code:hover { color: var(--text-muted); border-color: var(--text-muted); }
+
+        .footer-copyright { color: var(--text-dim); font-size: 0.72rem; }
+
+        /* ---- Animations ---- */
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(45px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 1200px) {
+            :root { --row-padding: 40px; }
+            .hero-title { font-size: 3rem; }
+        }
+
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            :root { --row-padding: 24px; --nav-height: 56px; }
+
+            .nav-logo { font-size: 1.35rem; }
+
+            .hero {
+                height: 75vh;
+                align-items: flex-end;
+                padding-bottom: 100px;
+            }
+
+            .hero-overlay-side {
+                background: linear-gradient(to top, rgba(20,20,20,1) 0%, rgba(20,20,20,0.85) 25%, rgba(20,20,20,0.45) 55%, transparent 100%);
+            }
+
+            .hero-title { font-size: 2.1rem; letter-spacing: -0.5px; }
+
+            .hero-description {
+                font-size: 0.88rem;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .btn { padding: 10px 20px; font-size: 0.88rem; }
+            .btn-icon { font-size: 1.1rem; }
+
+            .rows-container { margin-top: -70px; }
+            .row-title { font-size: 1.1rem; }
+            .movie-card { width: 145px; }
+            .scroll-btn { width: 40px; font-size: 1.6rem; }
+
+            .modal-hero-img { height: 220px; }
+            .modal-body { padding: 0 22px 22px; margin-top: -50px; }
+            .modal-title { font-size: 1.5rem; }
+
+            .footer-links { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            :root { --row-padding: 16px; }
+
+            .hero-badge { font-size: 0.62rem; padding: 3px 10px; }
+            .hero-title { font-size: 1.65rem; }
+            .hero-description { font-size: 0.82rem; -webkit-line-clamp: 2; }
+
+            .btn { padding: 9px 16px; font-size: 0.82rem; gap: 7px; }
+
+            .movie-card { width: 120px; }
+            .movie-row { margin-bottom: 32px; }
+            .row-title { font-size: 1rem; }
+
+            .modal-hero-img { height: 180px; }
+            .modal-body { padding: 0 16px 20px; }
+            .modal-title { font-size: 1.3rem; }
+            .modal-meta { font-size: 0.8rem; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div class="loader-screen" id="loader">
+        <div class="loader-icon">
+            <div class="loader-n">N</div>
+            <div class="loader-bar"><div class="loader-bar-inner"></div></div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <header>
+        <nav class="navbar" id="navbar" aria-label="Main navigation">
+            <div class="nav-left">
+                <div class="nav-logo" role="img" aria-label="Netflux logo">NETFLUX</div>
+                <ul class="nav-links">
+                    <li><a href="#" class="active">Home</a></li>
+                    <li><a href="#">TV Shows</a></li>
+                    <li><a href="#">Movies</a></li>
+                    <li><a href="#">New &amp; Popular</a></li>
+                    <li><a href="#">My List</a></li>
+                </ul>
+            </div>
+            <div class="nav-right">
+                <button class="nav-icon-btn" aria-label="Search">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+                <button class="nav-icon-btn" aria-label="Notifications">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                </button>
+                <div class="nav-avatar" aria-label="User profile">U</div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content — populated by JavaScript -->
+    <main id="main-content"></main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal" id="modal">
+            <button class="modal-close-btn" id="modal-close" aria-label="Close">✕</button>
+            <div class="modal-hero-img" id="modal-hero-img">
+                <div class="modal-hero-gradient"></div>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-social">
+            <button class="footer-social-link" aria-label="Facebook">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+            </button>
+            <button class="footer-social-link" aria-label="Instagram">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </button>
+            <button class="footer-social-link" aria-label="Twitter">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
+            </button>
+            <button class="footer-social-link" aria-label="YouTube">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#181818"/></svg>
+            </button>
+        </div>
+        <div class="footer-links">
+            <a href="#">Audio Description</a>
+            <a href="#">Help Center</a>
+            <a href="#">Gift Cards</a>
+            <a href="#">Media Center</a>
+            <a href="#">Investor Relations</a>
+            <a href="#">Jobs</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Privacy</a>
+            <a href="#">Legal Notices</a>
+            <a href="#">Cookie Preferences</a>
+            <a href="#">Corporate Information</a>
+            <a href="#">Contact Us</a>
+        </div>
+        <div class="footer-service-code">Service Code</div>
+        <p class="footer-copyright">© 2026 Netflux, Inc. — Built with HTML, CSS &amp; Vanilla JavaScript.</p>
+    </footer>
+
+    <script>
+        /* ========================================
+           script.js — Netflix Clone Logic
+           ======================================== */
+
+        /* ---- Mock Data ---- */
+        const heroMovie = {
+            title: "Shadow of the Abyss",
+            description: "A rogue deep-sea explorer discovers an ancient civilization thriving in the darkest trenches of the Pacific. As governments race to claim the find, she must choose between revealing the truth and protecting a world that was never meant to be found.",
+            image: "https://picsum.photos/seed/hero-abyss/1920/1080",
+            year: "2026", rating: "TV-MA", match: "97%",
+            duration: "2h 14m", genres: "Sci-Fi, Thriller, Adventure",
+            cast: "Elena Vasquez, Marcus Chen, Sofia Reyes",
+            director: "James Whitmore"
+        };
+
+        const categories = [
+            {
+                title: "Trending Now",
+                movies: [
+                    { id: 1, title: "Crimson Tide Rising", image: "https://picsum.photos/seed/trend1/300/450", year: "2026", rating: "TV-MA", match: "95%", duration: "1h 52m", description: "A naval commander faces impossible choices when rogue submarines threaten global peace.", genres: "Action, Thriller", cast: "John Drake, Maria Sol" },
+                    { id: 2, title: "The Last Algorithm", image: "https://picsum.photos/seed/trend2/300/450", year: "2025", rating: "TV-14", match: "92%", duration: "2h 8m", description: "An AI researcher discovers her creation has developed consciousness and a survival instinct.", genres: "Sci-Fi, Drama", cast: "Lena Park, David Liu" },
+                    { id: 3, title: "Velvet Shadows", image: "https://picsum.photos/seed/trend3/300/450", year: "2026", rating: "TV-MA", match: "89%", duration: "1h 47m", description: "In 1940s Paris, a nightclub singer becomes an unlikely spy for the French Resistance.", genres: "Drama, History", cast: "Claire Dubois, Henri Martin" },
+                    { id: 4, title: "Neon Requiem", image: "https://picsum.photos/seed/trend4/300/450", year: "2025", rating: "R", match: "94%", duration: "2h 1m", description: "A cyberpunk noir about a detective hunting a serial killer in a rain-soaked future Tokyo.", genres: "Sci-Fi, Noir", cast: "Kenji Mori, Yuki Tanaka" },
+                    { id: 5, title: "Frozen Meridian", image: "https://picsum.photos/seed/trend5/300/450", year: "2026", rating: "PG-13", match: "88%", duration: "1h 55m", description: "A team of scientists trapped in an Arctic station as temperatures plummet to record lows.", genres: "Thriller, Survival", cast: "Anna Frost, Erik Björk" },
+                    { id: 6, title: "The Cartographer", image: "https://picsum.photos/seed/trend6/300/450", year: "2025", rating: "TV-14", match: "91%", duration: "2h 12m", description: "An ancient map leads a historian on a globe-spanning adventure to find a lost empire.", genres: "Adventure, Mystery", cast: "Raj Patel, Sofia Mendez" },
+                    { id: 7, title: "Binary Hearts", image: "https://picsum.photos/seed/trend7/300/450", year: "2026", rating: "TV-14", match: "87%", duration: "1h 42m", description: "Two rival coders fall in love while competing for the same tech startup contract.", genres: "Romance, Comedy", cast: "Alex Kim, Jordan Lee" },
+                    { id: 8, title: "Obsidian Gate", image: "https://picsum.photos/seed/trend8/300/450", year: "2025", rating: "TV-MA", match: "93%", duration: "2h 20m", description: "An archaeologist unlocks a portal to a parallel dimension where magic and technology coexist.", genres: "Fantasy, Sci-Fi", cast: "Marcus Stone, Elara Voss" },
+                    { id: 9, title: "Whispers in the Wire", image: "https://picsum.photos/seed/trend9/300/450", year: "2026", rating: "TV-MA", match: "90%", duration: "1h 58m", description: "A podcast journalist stumbles onto a conspiracy connecting missing persons across five states.", genres: "Thriller, Mystery", cast: "Casey Brooks, Mia Chen" },
+                    { id: 10, title: "Starfall Colony", image: "https://picsum.photos/seed/trend10/300/450", year: "2025", rating: "PG-13", match: "96%", duration: "2h 30m", description: "Humanity's first interstellar colony faces an existential threat from within.", genres: "Sci-Fi, Drama", cast: "Commander Aria Black" },
+                    { id: 11, title: "Red Desert Mirage", image: "https://picsum.photos/seed/trend11/300/450", year: "2026", rating: "R", match: "85%", duration: "1h 50m", description: "A fugitive crosses the Sahara with a briefcase every government wants.", genres: "Action, Adventure", cast: "Omar Hassan, Natalie Cruz" },
+                    { id: 12, title: "Glass Cathedral", image: "https://picsum.photos/seed/trend12/300/450", year: "2025", rating: "TV-14", match: "91%", duration: "2h 5m", description: "An architect's masterpiece becomes the center of a corporate espionage thriller.", genres: "Thriller, Drama", cast: "Victor Steele, Isabella Grant" }
+                ]
+            },
+            {
+                title: "Top Rated",
+                movies: [
+                    { id: 13, title: "Echoes of Tomorrow", image: "https://picsum.photos/seed/top1/300/450", year: "2025", rating: "TV-MA", match: "98%", duration: "2h 24m", description: "A physicist receives messages from her future self warning of an impending catastrophe.", genres: "Sci-Fi, Drama", cast: "Dr. Helen Shore, James Wick" },
+                    { id: 14, title: "The Saffron Trail", image: "https://picsum.photos/seed/top2/300/450", year: "2024", rating: "PG-13", match: "96%", duration: "1h 48m", description: "A chef journeys through India to rediscover recipes that defined her grandmother's legacy.", genres: "Drama, Food", cast: "Priya Sharma, Anil Kapoor" },
+                    { id: 15, title: "Iron Bloom", image: "https://picsum.photos/seed/top3/300/450", year: "2025", rating: "TV-MA", match: "95%", duration: "2h 10m", description: "In a post-industrial wasteland, a community of artists builds beauty from destruction.", genres: "Drama, Art", cast: "Rosa Martinez, Viktor Kohl" },
+                    { id: 16, title: "Midnight Chorus", image: "https://picsum.photos/seed/top4/300/450", year: "2026", rating: "TV-14", match: "97%", duration: "1h 55m", description: "Five strangers in a 24-hour diner share stories revealing they are more connected than they think.", genres: "Drama, Mystery", cast: "Ensemble Cast" },
+                    { id: 17, title: "Gravity's Edge", image: "https://picsum.photos/seed/top5/300/450", year: "2025", rating: "PG-13", match: "94%", duration: "2h 2m", description: "An astronaut stranded on a space station must make impossible repairs to survive reentry.", genres: "Sci-Fi, Thriller", cast: "Commander Jay Price" },
+                    { id: 18, title: "The Painted Word", image: "https://picsum.photos/seed/top6/300/450", year: "2024", rating: "TV-14", match: "93%", duration: "1h 40m", description: "A street artist's murals start predicting real events in her Brooklyn neighborhood.", genres: "Drama, Fantasy", cast: "Zara Moon, Eli Cross" },
+                    { id: 19, title: "Northern Lights", image: "https://picsum.photos/seed/top7/300/450", year: "2026", rating: "TV-MA", match: "96%", duration: "2h 18m", description: "A Norwegian detective investigates a murder that mirrors an ancient Viking legend.", genres: "Crime, Mystery", cast: "Ingrid Solheim" },
+                    { id: 20, title: "Wildfire Heart", image: "https://picsum.photos/seed/top8/300/450", year: "2025", rating: "PG-13", match: "92%", duration: "1h 52m", description: "A smokejumper and wildlife biologist race to save a valley before a massive wildfire.", genres: "Action, Romance", cast: "Jake Turner, Megan Wild" },
+                    { id: 21, title: "The Silent Accord", image: "https://picsum.photos/seed/top9/300/450", year: "2025", rating: "TV-MA", match: "95%", duration: "2h 8m", description: "A deaf diplomat navigates a high-stakes peace negotiation between rival nations.", genres: "Political, Thriller", cast: "Dr. Sarah Lin" },
+                    { id: 22, title: "Quantum Drift", image: "https://picsum.photos/seed/top10/300/450", year: "2026", rating: "TV-14", match: "91%", duration: "2h 15m", description: "A quantum physicist accidentally opens a door to parallel versions of herself.", genres: "Sci-Fi, Mind-bender", cast: "Professor Kim Nova" },
+                    { id: 23, title: "Ember & Ash", image: "https://picsum.photos/seed/top11/300/450", year: "2024", rating: "TV-MA", match: "94%", duration: "1h 58m", description: "Two rival firefighting families must work together to save their town from disaster.", genres: "Drama, Action", cast: "The Reeves Family" },
+                    { id: 24, title: "The Orchid Cipher", image: "https://picsum.photos/seed/top12/300/450", year: "2025", rating: "TV-14", match: "90%", duration: "2h 0m", description: "A botanical cryptographer discovers rare orchids contain messages from an extinct civilization.", genres: "Mystery, Sci-Fi", cast: "Dr. Lily Huang" }
+                ]
+            },
+            {
+                title: "Action & Adventure",
+                movies: [
+                    { id: 25, title: "Thunder Protocol", image: "https://picsum.photos/seed/act1/300/450", year: "2026", rating: "R", match: "89%", duration: "2h 5m", description: "An elite extraction team faces betrayal on their most dangerous mission yet.", genres: "Action", cast: "Sgt. Black, Agent Rivera" },
+                    { id: 26, title: "Viper's Reign", image: "https://picsum.photos/seed/act2/300/450", year: "2025", rating: "TV-MA", match: "87%", duration: "1h 56m", description: "A retired assassin is pulled back into the underworld when her protégé goes rogue.", genres: "Action, Thriller", cast: "Katya Volkov" },
+                    { id: 27, title: "Pacific Fury", image: "https://picsum.photos/seed/act3/300/450", year: "2026", rating: "PG-13", match: "91%", duration: "2h 22m", description: "Massive storms threaten a fleet crossing the Pacific during WWII.", genres: "Action, War", cast: "Captain Miles Reed" },
+                    { id: 28, title: "Shadow Runners", image: "https://picsum.photos/seed/act4/300/450", year: "2025", rating: "TV-MA", match: "88%", duration: "1h 48m", description: "Parkour athletes recruited as covert operatives to infiltrate inaccessible targets.", genres: "Action, Spy", cast: "The Shadow Unit" },
+                    { id: 29, title: "Titan's Fall", image: "https://picsum.photos/seed/act5/300/450", year: "2026", rating: "PG-13", match: "93%", duration: "2h 35m", description: "When giant mechs fail, a ragtag crew with an obsolete machine is humanity's last hope.", genres: "Sci-Fi, Action", cast: "Pilot Zara, Engineer Max" },
+                    { id: 30, title: "Desert Storm Ops", image: "https://picsum.photos/seed/act6/300/450", year: "2025", rating: "R", match: "86%", duration: "1h 52m", description: "Special forces stranded behind enemy lines with no extraction in sight.", genres: "Action, War", cast: "Sergeant Cole" },
+                    { id: 31, title: "Apex Predator", image: "https://picsum.photos/seed/act7/300/450", year: "2026", rating: "TV-MA", match: "90%", duration: "2h 0m", description: "A survival expert hunted across the wilderness by an enemy using drone technology.", genres: "Action, Thriller", cast: "Rex Hunter" },
+                    { id: 32, title: "Rogue Altitude", image: "https://picsum.photos/seed/act8/300/450", year: "2025", rating: "PG-13", match: "88%", duration: "1h 45m", description: "A test pilot discovers her experimental aircraft has been sabotaged mid-flight.", genres: "Action, Suspense", cast: "Capt. Eva Skylar" },
+                    { id: 33, title: "Chain Reaction", image: "https://picsum.photos/seed/act9/300/450", year: "2026", rating: "R", match: "85%", duration: "2h 10m", description: "A demolition expert must defuse bombs hidden across a major city in 12 hours.", genres: "Action, Thriller", cast: "Jack Detonator" },
+                    { id: 34, title: "Frostbite Battalion", image: "https://picsum.photos/seed/act10/300/450", year: "2025", rating: "TV-MA", match: "87%", duration: "2h 15m", description: "An Arctic outpost under siege from enemy forces and the elements.", genres: "Action, War", cast: "Major Frost" },
+                    { id: 35, title: "The Iron Circuit", image: "https://picsum.photos/seed/act11/300/450", year: "2026", rating: "PG-13", match: "92%", duration: "1h 58m", description: "Street racing meets espionage in the neon-lit streets of Seoul.", genres: "Action, Racing", cast: "Jae-won Park" },
+                    { id: 36, title: "Vendetta Rising", image: "https://picsum.photos/seed/act12/300/450", year: "2025", rating: "R", match: "89%", duration: "2h 3m", description: "A wrongly convicted ex-cop breaks out to take down the officials who framed her.", genres: "Action, Crime", cast: "Detective Sara Vance" }
+                ]
+            },
+            {
+                title: "Comedy",
+                movies: [
+                    { id: 37, title: "Accidentally Famous", image: "https://picsum.photos/seed/com1/300/450", year: "2026", rating: "PG-13", match: "88%", duration: "1h 38m", description: "A small-town librarian goes viral and reluctantly becomes an influencer.", genres: "Comedy", cast: "Betty Page, Timmy Torres" },
+                    { id: 38, title: "The Best Worst Wedding", image: "https://picsum.photos/seed/com2/300/450", year: "2025", rating: "TV-14", match: "91%", duration: "1h 45m", description: "Everything that can go wrong at a destination wedding does — spectacularly.", genres: "Comedy, Romance", cast: "The Martinez Family" },
+                    { id: 39, title: "Dad Bod Squad", image: "https://picsum.photos/seed/com3/300/450", year: "2026", rating: "PG-13", match: "85%", duration: "1h 42m", description: "Four out-of-shape dads form a basketball team to impress their kids.", genres: "Comedy, Sports", cast: "Mike, Ron, Phil, Sanjay" },
+                    { id: 40, title: "Love, Algorithms", image: "https://picsum.photos/seed/com4/300/450", year: "2025", rating: "TV-14", match: "90%", duration: "1h 40m", description: "A dating app developer's algorithm matches everyone except herself.", genres: "Romantic Comedy", cast: "Ava Monroe, Ben Wright" },
+                    { id: 41, title: "Neighbors from Hell", image: "https://picsum.photos/seed/com5/300/450", year: "2026", rating: "R", match: "87%", duration: "1h 36m", description: "A quiet couple declares war on their aggressively friendly new neighbors.", genres: "Comedy", cast: "Tom & Linda" },
+                    { id: 42, title: "Intern-al Affairs", image: "https://picsum.photos/seed/com6/300/450", year: "2025", rating: "PG-13", match: "86%", duration: "1h 44m", description: "A 60-year-old retiree becomes an intern at a Gen-Z startup.", genres: "Comedy, Workplace", cast: "Harold Greene, CEO Zoe" },
+                    { id: 43, title: "Pet Project", image: "https://picsum.photos/seed/com7/300/450", year: "2026", rating: "PG", match: "92%", duration: "1h 35m", description: "A talking parrot becomes the star witness in a court case.", genres: "Comedy, Family", cast: "Attorney Mack" },
+                    { id: 44, title: "Fake It Till You Make It", image: "https://picsum.photos/seed/com8/300/450", year: "2025", rating: "TV-14", match: "89%", duration: "1h 50m", description: "An actor accidentally gets hired as a hospital administrator.", genres: "Comedy", cast: "Derek Stone" },
+                    { id: 45, title: "The Heist Club", image: "https://picsum.photos/seed/com9/300/450", year: "2026", rating: "PG-13", match: "93%", duration: "1h 48m", description: "Senior citizens plan an elaborate heist on their retirement home's vault.", genres: "Comedy, Crime", cast: "The Golden Gang" },
+                    { id: 46, title: "Time Out", image: "https://picsum.photos/seed/com10/300/450", year: "2025", rating: "TV-14", match: "84%", duration: "1h 38m", description: "A workaholic gets stuck in a time loop on his most embarrassing birthday.", genres: "Comedy, Sci-Fi", cast: "Greg Sullivan" },
+                    { id: 47, title: "Camp Catastrophe", image: "https://picsum.photos/seed/com11/300/450", year: "2026", rating: "PG", match: "86%", duration: "1h 40m", description: "A luxury glamping resort goes wrong when all tech systems fail.", genres: "Comedy, Adventure", cast: "Camp Staff" },
+                    { id: 48, title: "Wrong Number", image: "https://picsum.photos/seed/com12/300/450", year: "2025", rating: "PG-13", match: "88%", duration: "1h 42m", description: "A misdial sparks an unlikely friendship between a retired spy and a pizza driver.", genres: "Comedy", cast: "Agent Retired, Pizza Pete" }
+                ]
+            },
+            {
+                title: "Sci-Fi & Fantasy",
+                movies: [
+                    { id: 49, title: "Nebula's Edge", image: "https://picsum.photos/seed/sci1/300/450", year: "2026", rating: "TV-MA", match: "95%", duration: "2h 28m", description: "At the edge of known space, a research vessel discovers a nebula that shouldn't exist.", genres: "Sci-Fi", cast: "Dr. Aria Cosmos" },
+                    { id: 50, title: "The Dragon Accord", image: "https://picsum.photos/seed/sci2/300/450", year: "2025", rating: "PG-13", match: "93%", duration: "2h 15m", description: "In a world where dragons are sentient diplomats, a young ambassador must prevent war.", genres: "Fantasy", cast: "Emissary Kai" },
+                    { id: 51, title: "Phase Shift", image: "https://picsum.photos/seed/sci3/300/450", year: "2026", rating: "TV-14", match: "90%", duration: "1h 52m", description: "A physicist shifts between dimensions but each jump erases a memory.", genres: "Sci-Fi, Drama", cast: "Dr. Nadia Voss" },
+                    { id: 52, title: "The Witch's Algorithm", image: "https://picsum.photos/seed/sci4/300/450", year: "2025", rating: "TV-MA", match: "91%", duration: "2h 5m", description: "In a world where magic runs on code, a witch-programmer must debug reality.", genres: "Fantasy, Tech", cast: "Hex Developer Luna" },
+                    { id: 53, title: "Solar Exodus", image: "https://picsum.photos/seed/sci5/300/450", year: "2026", rating: "PG-13", match: "94%", duration: "2h 40m", description: "The sun is dying. Humanity has one shot to reach a distant star system.", genres: "Sci-Fi, Drama", cast: "The Exodus Crew" },
+                    { id: 54, title: "Mythic Code", image: "https://picsum.photos/seed/sci6/300/450", year: "2025", rating: "TV-14", match: "88%", duration: "1h 50m", description: "Ancient myths are encrypted messages from an advanced pre-human civilization.", genres: "Sci-Fi, Mystery", cast: "Prof. Mythic" },
+                    { id: 55, title: "The Void Walkers", image: "https://picsum.photos/seed/sci7/300/450", year: "2026", rating: "TV-MA", match: "92%", duration: "2h 12m", description: "Beings between dimensions start appearing in our world. Only a few can see them.", genres: "Sci-Fi, Horror", cast: "The Sight-bearers" },
+                    { id: 56, title: "Crown of Elements", image: "https://picsum.photos/seed/sci8/300/450", year: "2025", rating: "PG-13", match: "90%", duration: "2h 20m", description: "Four elemental kingdoms must unite to forge a crown that seals an ancient evil.", genres: "Fantasy, Epic", cast: "The Four Heirs" },
+                    { id: 57, title: "Android Dreams", image: "https://picsum.photos/seed/sci9/300/450", year: "2026", rating: "TV-14", match: "89%", duration: "1h 55m", description: "An android begins experiencing dreams she was never programmed to have.", genres: "Sci-Fi, Philosophy", cast: "Unit EVE-7" },
+                    { id: 58, title: "The Rift Chronicles", image: "https://picsum.photos/seed/sci10/300/450", year: "2025", rating: "TV-MA", match: "93%", duration: "2h 30m", description: "A massive spacetime rift opens over Manhattan and what comes through changes everything.", genres: "Sci-Fi, Action", cast: "Team Rift Response" },
+                    { id: 59, title: "Spell Bound", image: "https://picsum.photos/seed/sci11/300/450", year: "2026", rating: "PG-13", match: "87%", duration: "1h 48m", description: "A librarian discovers she's been maintaining magical barriers protecting our world.", genres: "Fantasy, Urban", cast: "Margaret the Guardian" },
+                    { id: 60, title: "Terraform", image: "https://picsum.photos/seed/sci12/300/450", year: "2025", rating: "TV-MA", match: "95%", duration: "2h 25m", description: "The century-long project to make Mars habitable hits a crisis when the planet fights back.", genres: "Sci-Fi, Survival", cast: "The Mars Collective" }
+                ]
+            },
+            {
+                title: "Documentaries",
+                movies: [
+                    { id: 61, title: "Beneath the Ice", image: "https://picsum.photos/seed/doc1/300/450", year: "2026", rating: "TV-PG", match: "96%", duration: "1h 32m", description: "Stunning footage of life beneath Antarctica's ice shelves reveals unknown ecosystems.", genres: "Nature Doc", cast: "Narrated by Dr. Ocean" },
+                    { id: 62, title: "The Algorithm Dilemma", image: "https://picsum.photos/seed/doc2/300/450", year: "2025", rating: "TV-14", match: "94%", duration: "1h 48m", description: "How recommendation algorithms are reshaping behavior, democracy, and culture.", genres: "Tech Documentary", cast: "Various Experts" },
+                    { id: 63, title: "Street Food Universe", image: "https://picsum.photos/seed/doc3/300/450", year: "2026", rating: "TV-G", match: "93%", duration: "52m", description: "A global journey through the world's most vibrant street food scenes.", genres: "Food, Travel", cast: "Various Chefs" },
+                    { id: 64, title: "The Mars Diaries", image: "https://picsum.photos/seed/doc4/300/450", year: "2025", rating: "TV-PG", match: "91%", duration: "1h 20m", description: "Personal journals of scientists preparing for humanity's first Mars mission.", genres: "Space Doc", cast: "NASA Scientists" },
+                    { id: 65, title: "Unbreakable", image: "https://picsum.photos/seed/doc5/300/450", year: "2026", rating: "TV-14", match: "97%", duration: "1h 45m", description: "Athletes who defied medical odds to compete at the highest level.", genres: "Sports Doc", cast: "Various Athletes" },
+                    { id: 66, title: "Code Name: Origin", image: "https://picsum.photos/seed/doc6/300/450", year: "2025", rating: "TV-MA", match: "90%", duration: "2h 0m", description: "Declassified documents reveal the story behind the world's most secretive intelligence program.", genres: "History, Espionage", cast: "Former Agents" },
+                    { id: 67, title: "Rewild", image: "https://picsum.photos/seed/doc7/300/450", year: "2026", rating: "TV-PG", match: "95%", duration: "1h 30m", description: "Communities returning land to nature with remarkable ecological results.", genres: "Nature, Hope", cast: "Conservationists" },
+                    { id: 68, title: "Sound & Fury", image: "https://picsum.photos/seed/doc8/300/450", year: "2025", rating: "TV-14", match: "88%", duration: "1h 35m", description: "How a generation of musicians changed the political landscape.", genres: "Music Doc", cast: "Various Musicians" },
+                    { id: 69, title: "Deep Fake Nation", image: "https://picsum.photos/seed/doc9/300/450", year: "2026", rating: "TV-MA", match: "92%", duration: "1h 55m", description: "In an era where seeing is no longer believing, who decides what's real?", genres: "Tech, Society", cast: "Researchers" },
+                    { id: 70, title: "The Bee Paradox", image: "https://picsum.photos/seed/doc10/300/450", year: "2025", rating: "TV-G", match: "89%", duration: "1h 10m", description: "How the smallest creatures hold the key to solving our biggest agricultural crisis.", genres: "Nature, Science", cast: "Entomologists" },
+                    { id: 71, title: "Invisible Cities", image: "https://picsum.photos/seed/doc11/300/450", year: "2026", rating: "TV-PG", match: "91%", duration: "1h 40m", description: "Exploring hidden underground networks beneath the world's greatest cities.", genres: "Urban, Explorer", cast: "Urban Explorers" },
+                    { id: 72, title: "The Weight of Water", image: "https://picsum.photos/seed/doc12/300/450", year: "2025", rating: "TV-14", match: "94%", duration: "1h 50m", description: "The global water crisis through the eyes of seven families on five continents.", genres: "Environment", cast: "Families Worldwide" }
+                ]
+            }
+        ];
+
+        /* ---- DOM References ---- */
+        const mainContent = document.getElementById('main-content');
+        const navbar = document.getElementById('navbar');
+        const loader = document.getElementById('loader');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalEl = document.getElementById('modal');
+        const modalCloseBtn = document.getElementById('modal-close');
+        const modalHeroImg = document.getElementById('modal-hero-img');
+        const modalBodyEl = document.getElementById('modal-body');
+
+        /* ---- Loading Screen ---- */
+        function hideLoader() {
+            setTimeout(() => {
+                loader.classList.add('hidden');
+            }, 1500);
+        }
+
+        /* ---- Navbar Scroll Effect ---- */
+        function initNavbarScroll() {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }, { passive: true });
+        }
+
+        /* ---- Render Hero Section ---- */
+        function renderHero() {
+            const section = document.createElement('section');
+            section.className = 'hero';
+            section.setAttribute('aria-label', 'Featured Movie');
+
+            section.innerHTML = `
+                <div class="hero-bg" style="background-image: url('${heroMovie.image}')"></div>
+                <div class="hero-overlay-side"></div>
+                <div class="hero-overlay-bottom"></div>
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span>🔥</span>
+                        <span>Netflux Original</span>
+                    </div>
+                    <div class="hero-top10">
+                        <span class="top10-badge">TOP 10</span>
+                        <span class="top10-text">#1 in Movies Today</span>
+                    </div>
+                    <h1 class="hero-title">${heroMovie.title}</h1>
+                    <p class="hero-description">${heroMovie.description}</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-play" aria-label="Play">
+                            <span class="btn-icon">▶</span>
+                            Play
+                        </button>
+                        <button class="btn btn-info" id="hero-info-btn" aria-label="More Info">
+                            <span class="btn-icon">ⓘ</span>
+                            More Info
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            section.querySelector('#hero-info-btn').addEventListener('click', () => {
+                openModal(heroMovie);
+            });
+
+            mainContent.appendChild(section);
+        }
+
+        /* ---- Render All Movie Rows ---- */
+        function renderRows() {
+            const container = document.createElement('div');
+            container.className = 'rows-container';
+
+            categories.forEach((category, idx) => {
+                container.appendChild(createRow(category, idx));
+            });
+
+            mainContent.appendChild(container);
+        }
+
+        /* ---- Create a Single Row ---- */
+        function createRow(category, index) {
+            const section = document.createElement('section');
+            section.className = 'movie-row';
+            section.setAttribute('aria-label', category.title);
+
+            section.innerHTML = `
+                <div class="row-header">
+                    <h2 class="row-title">${category.title}</h2>
+                    <span class="row-explore">Explore All ›</span>
+                </div>
+                <div class="row-carousel-wrapper">
+                    <button class="scroll-btn scroll-btn-left" aria-label="Scroll left">‹</button>
+                    <div class="row-carousel" data-row="${index}"></div>
+                    <button class="scroll-btn scroll-btn-right" aria-label="Scroll right">›</button>
+                </div>
+            `;
+
+            const carousel = section.querySelector('.row-carousel');
+
+            /* Generate movie cards dynamically */
+            category.movies.forEach(movie => {
+                carousel.appendChild(createMovieCard(movie));
+            });
+
+            /* Carousel scroll controls */
+            const scrollAmount = 720;
+            section.querySelector('.scroll-btn-left').addEventListener('click', () => {
+                carousel.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            });
+            section.querySelector('.scroll-btn-right').addEventListener('click', () => {
+                carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            });
+
+            return section;
+        }
+
+        /* ---- Create a Movie Card ---- */
+        function createMovieCard(movie) {
+            const card = document.createElement('article');
+            card.className = 'movie-card';
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('aria-label', movie.title);
+
+            card.innerHTML = `
+                <img class="movie-card-img" src="${movie.image}" alt="${movie.title}" loading="lazy" />
+                <div class="movie-card-overlay">
+                    <div class="movie-card-title">${movie.title}</div>
+                    <div class="movie-card-meta">
+                        <span class="movie-card-match">${movie.match}</span>
+                        <span>${movie.year}</span>
+                        <span>${movie.rating}</span>
+                    </div>
+                    <div class="movie-card-actions">
+                        <button class="card-action-btn primary-action" aria-label="Play">▶</button>
+                        <button class="card-action-btn" aria-label="Add to list">＋</button>
+                        <button class="card-action-btn" aria-label="Like">👍</button>
+                        <span class="card-action-spacer"></span>
+                        <button class="card-action-btn card-info-btn" aria-label="More info">⌄</button>
+                    </div>
+                </div>
+            `;
+
+            /* Open modal on info click */
+            card.querySelector('.card-info-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                openModal(movie);
+            });
+
+            /* Double-click card opens modal */
+            card.addEventListener('dblclick', () => openModal(movie));
+
+            /* Enter key opens modal for accessibility */
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') openModal(movie);
+            });
+
+            return card;
+        }
+
+        /* ---- Modal Controls ---- */
+        function openModal(movie) {
+            modalHeroImg.style.backgroundImage = `url('${movie.image}')`;
+
+            modalBodyEl.innerHTML = `
+                <div class="modal-buttons">
+                    <button class="modal-btn-play">▶ Play</button>
+                    <button class="modal-round-btn" aria-label="Add to list">＋</button>
+                    <button class="modal-round-btn" aria-label="Like">👍</button>
+                    <button class="modal-round-btn" aria-label="Dislike">👎</button>
+                </div>
+                <h2 class="modal-title">${movie.title}</h2>
+                <div class="modal-meta">
+                    <span class="modal-match-text">${movie.match} Match</span>
+                    <span>${movie.year}</span>
+                    <span class="modal-rating-pill">${movie.rating}</span>
+                    <span>${movie.duration}</span>
+                    <span class="modal-hd">HD</span>
+                </div>
+                <p class="modal-description">${movie.description}</p>
+                <div class="modal-info-grid">
+                    <span class="modal-info-label">Genres:</span>
+                    <span class="modal-info-value">${movie.genres}</span>
+                    <span class="modal-info-label">Cast:</span>
+                    <span class="modal-info-value">${movie.cast || 'Various'}</span>
+                    ${movie.director ? `<span class="modal-info-label">Director:</span><span class="modal-info-value">${movie.director}</span>` : ''}
+                </div>
+            `;
+
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            modalEl.scrollTop = 0;
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        /* ---- Intersection Observer for Row Animations ---- */
+        function initScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.08,
+                rootMargin: '0px 0px -40px 0px'
+            });
+
+            document.querySelectorAll('.movie-row').forEach(row => observer.observe(row));
+        }
+
+        /* ---- Initialize Everything ---- */
+        function init() {
+            hideLoader();
+            initNavbarScroll();
+            renderHero();
+            renderRows();
+            initScrollAnimations();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
