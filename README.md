@@ -26,7 +26,7 @@ Environment Agnostic: Whether you are developing on macOS, Windows, or a gloriou
 🚀 Quick Start
 Because this project is built with vanilla web technologies, getting started is practically effortless.
 
-##SREENSHOOT:
+_**SREENSHOOT:**_
 ---
 <img width="1268" height="561" alt="Screenshot From 2026-03-29 22-48-07" src="https://github.com/user-attachments/assets/e1eeba17-6ad4-4d6f-b708-0e13315814e1" />
 
