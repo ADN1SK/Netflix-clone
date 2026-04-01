@@ -38,9 +38,9 @@ _**SREENSHOOT:**_
 ---
 
 
-Clone the repository:
+_**Clone the repository:
 
-Bash
+Bash**_
 git clone https://github.com/ADN1SK/netflux.git
 Open the application:
 Simply open the index.html file in your favorite web browser. No npm install, no build steps, just instant execution.
