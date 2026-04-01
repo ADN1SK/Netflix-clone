@@ -1,4 +1,5 @@
 _**🍿 NETFLUX: A Cinematic UI Experience**_
+---
 
 Short version: A sleek, high-performance Netflix clone built entirely with Vanilla HTML, CSS, and JavaScript.
 
