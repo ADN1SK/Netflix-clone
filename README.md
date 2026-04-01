@@ -24,7 +24,7 @@ CSS3: Advanced gradients, transitions, custom scrollbars, and variable-driven de
 Vanilla JavaScript: Lightweight DOM manipulation and data rendering.
 
 Environment Agnostic: Whether you are developing on macOS, Windows, or a glorious Fedora Linux machine, this runs natively in any modern browser. 🐧
-
+---
 🚀 Quick Start
 Because this project is built with vanilla web technologies, getting started is practically effortless.
 
