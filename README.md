@@ -1,6 +1,5 @@
 _**🍿 NETFLUX: A Cinematic UI Experience**_
 ---
-
 Short version: A sleek, high-performance Netflix clone built entirely with Vanilla HTML, CSS, and JavaScript.
 
 Netflux is an exploration into modern web design, proving that you don't need heavy frameworks to create a beautiful, dynamic, and fully responsive streaming interface. From the custom-built loader to the buttery-smooth horizontal scrolling rows, every pixel is crafted for immersion.
