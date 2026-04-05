@@ -37,12 +37,13 @@ _**SREENSHOOT:**_
 ---
 
 
-_**Clone the repository:
+_**Clone the repository:**_
 
-Bash**_
+**Bash**
+---
 git clone https://github.com/ADN1SK/netflux.git
 Open the application:
 Simply open the index.html file in your favorite web browser. No npm install, no build steps, just instant execution.
 
-**📂 Project Structure**
+_**📂 Project Structure**_
 Everything is currently elegantly housed within a single file for rapid prototyping, demonstrating the raw power of the browser's native capabilities. Future iterations may separate logic into distinct style.css and script.js files for scalability.
